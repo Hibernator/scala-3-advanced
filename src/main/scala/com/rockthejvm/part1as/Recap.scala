@@ -1,5 +1,6 @@
 package com.rockthejvm.part1as
 
+import scala.annotation.nowarn
 import scala.annotation.tailrec
 
 object Recap {
@@ -8,6 +9,7 @@ object Recap {
   val aCondition = false // vals are constants
   val anIfExpression: Int = if aCondition then 42 else 55 // expressions evaluate to a value
 
+  @nowarn
   val aCodeBlock: Int = {
     if aCondition then 54
     78
