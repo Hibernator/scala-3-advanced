@@ -5,7 +5,7 @@ import scala.util.Try
 
 object DarkSugars {
 
-  // 1 - sugar for methods with one argument
+  // 1 - sugar for methods with one argument. Single-argument curly brace pattern
   def singleArgMethod(arg: Int): Int = arg + 1
 
   val aMethodCall = singleArgMethod({
