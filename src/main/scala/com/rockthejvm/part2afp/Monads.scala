@@ -1,5 +1,9 @@
 package com.rockthejvm.part2afp
 
+import scala.annotation.nowarn
+import scala.annotation.targetName
+
+@nowarn
 object Monads {
 
   def listStory(): Unit = {
@@ -84,5 +88,100 @@ object Monads {
   // MONADS = data structures with ability to chain dependent computations
   // Monads are data structures and computations that can wrap existing values in bigger data structures such that the flatMap method on those datatypes uphold the above properties
 
-  def main(args: Array[String]): Unit = {}
+  // exercise: IS THIS a MONAD? What does this monad actually mean, why would we need it?
+  // answer: it is a Monad but I have to compare values produced, not lambdas
+  // interpretation: ANY computation that might perform side effects
+  // description of computation is separated from performance of computation
+  // It's a simplified version of IO
+  case class PossiblyMonad[A](unsafeRun: () => A) {
+    def map[B](f: A => B): PossiblyMonad[B] =
+      PossiblyMonad(() => f(unsafeRun()))
+
+    def flatMap[B](f: A => PossiblyMonad[B]): PossiblyMonad[B] =
+      PossiblyMonad(() => f(unsafeRun()).unsafeRun()) // when unsafeRun is passed to f, it's not actually performed
+  }
+
+  object PossiblyMonad {
+
+    // In bytecode, methods accepting 0-arg lambda and methods accepting parameter by name are erased to the same type
+    @targetName("pure") // has to be done to avoid the clash with the auto-generated apply method in the JVM bytecode.
+    def apply[A](value: => A): PossiblyMonad[A] = // passed by value in order not to invoke unsafeRun unless necessary
+      new PossiblyMonad(() => value) // new is to avoid the tailrec warning
+  }
+
+  def possiblyMonadStory(): Unit = {
+    val aPossiblyMonad = PossiblyMonad(42)
+    val possiblyMonadString: PossiblyMonad[String] = for {
+      lang <- PossiblyMonad("Scala")
+      version <- PossiblyMonad(3)
+    } yield s"$lang-$version"
+
+    val possiblyMonadString_v2: PossiblyMonad[String] =
+      PossiblyMonad("Scala").flatMap(lang => PossiblyMonad(3).map(version => s"$lang-$version"))
+
+    val f = (x: Int) => PossiblyMonad(x + 1)
+    val g = (x: Int) => PossiblyMonad(2 * x)
+    val pure = (x: Int) => PossiblyMonad(x) // PossiblyMonad "constructor"
+
+    // 1. Left identity pure(x).flatMap(f) == f(x)
+    val leftIdentity = pure(4).flatMap(f).unsafeRun() == f(4).unsafeRun()
+    // comparing without calling unsafeRun yields false because a member of PossiblyMonad is a lambda, not a specific value
+    println(leftIdentity)
+
+    // 2. Right identity aMonad.flatMap(pure) == aMonad
+    val rightIdentity = PossiblyMonad(4).flatMap(pure).unsafeRun() == PossiblyMonad(4).unsafeRun()
+    println(rightIdentity)
+
+    // 3. Associativity aMonad.flatMap(x => f(x).flatMap(g)) == aMonad.flatMap(f).flatMap(g)
+    val associativity =
+      PossiblyMonad(4).flatMap(x => f(x).flatMap(g)).unsafeRun() == PossiblyMonad(4).flatMap(f).flatMap(g).unsafeRun()
+    println(associativity)
+
+    val fs = (x: Int) =>
+      PossiblyMonad {
+        println("incrementing")
+        x + 1
+      }
+
+    val gs = (x: Int) =>
+      PossiblyMonad {
+        println("doubling")
+        x * 2
+      }
+
+    // testing not only produced result but also the order of computations
+    val associativity_v3 =
+      PossiblyMonad(4)
+        .flatMap(x => fs(x).flatMap(gs))
+        .unsafeRun() == PossiblyMonad(4).flatMap(fs).flatMap(gs).unsafeRun()
+    println(associativity_v3)
+  }
+  // PossiblyMonad wraps a computation that can have side effects. It doesn't perform it at construction phase.
+
+  def possiblyMonadExample(): Unit = {
+    val aPossiblyMonad = PossiblyMonad {
+      println("printing my first possibly monad")
+      // do some computations
+      42
+    }
+
+    val anotherPM = PossiblyMonad {
+      println("my second PM")
+      "Scala"
+    }
+
+    val aResult = aPossiblyMonad.unsafeRun()
+    println(aResult)
+
+    // Monads can be combined with map flatMap without actually performing computations
+    val aForComprehension = for { // computations are DESCRIBED but not PERFORMED
+      num <- aPossiblyMonad
+      lang <- anotherPM
+    } yield s"$num-$lang"
+  }
+
+  def main(args: Array[String]): Unit = {
+    possiblyMonadStory()
+    possiblyMonadExample()
+  }
 }

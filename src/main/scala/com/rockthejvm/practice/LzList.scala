@@ -1,6 +1,7 @@
 package com.rockthejvm.practice
 
-import scala.annotation.{tailrec, targetName}
+import scala.annotation.tailrec
+import scala.annotation.targetName
 
 // Write lazily evaluated, potentially INFINITE linked list
 abstract class LzList[A] {
