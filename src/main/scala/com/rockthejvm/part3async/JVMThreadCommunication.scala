@@ -1,9 +1,13 @@
 package com.rockthejvm.part3async
 
+import scala.collection.mutable
+import scala.util.Random
+
 object JVMThreadCommunication {
   def main(args: Array[String]): Unit = {
 //    ProdConsV1.start()
-    ProdConsV2.start()
+//    ProdConsV2.start()
+    ProdConsV3.start(4)
   }
 }
 
@@ -91,4 +95,64 @@ object ProdConsV2 {
     producer.start()
   }
 
+}
+
+// insert a larger container (queue)
+// producer -> [ _ _ _ ] -> consumer
+// producer will insert values into the queue as long as there is space available, producer will retrieve values
+// producer will wait if the queue is full
+// consumer will pause if the queue is empty
+object ProdConsV3 {
+  def start(containerCapacity: Int): Unit = {
+    val buffer: mutable.Queue[Int] = new mutable.Queue[Int]
+
+    val consumer = new Thread(() => {
+      val random = new Random(System.nanoTime())
+
+      while (true) {
+        buffer.synchronized {
+          if (buffer.isEmpty) {
+            println("[consumer] buffer empty, waiting...")
+            buffer.wait()
+          }
+
+          // buffer is not empty
+          val x = buffer.dequeue()
+          println(s"[consumer] I've just consumer $x")
+
+          // producer, give me more elements
+          buffer.notify()
+        }
+        Thread.sleep(random.nextInt(500)) // sleep at most half a second
+      }
+    })
+
+    val producer = new Thread(() => {
+      val random = new Random(System.nanoTime())
+      var counter = 0
+
+      while (true) {
+        buffer.synchronized {
+          if (buffer.size == containerCapacity) {
+            println("[producer] buffer full, waiting...")
+            buffer.wait()
+          }
+
+          // buffer is not full
+          val newElement = counter
+          counter += 1
+          println(s"[producer] I'm producing $newElement")
+          buffer.enqueue(newElement)
+
+          // consumer, don't be lazy
+          buffer.notify() // wakes up the consumer if it's asleep. NOOP if there is no thread waiting for it
+        }
+
+        Thread.sleep(random.nextInt(500))
+      }
+    })
+
+    consumer.start()
+    producer.start()
+  }
 }
