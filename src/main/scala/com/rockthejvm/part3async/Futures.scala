@@ -2,7 +2,8 @@ package com.rockthejvm.part3async
 
 import java.util.concurrent.{ExecutorService, Executors}
 import scala.annotation.nowarn
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Random, Success, Try}
 
 object Futures {
@@ -130,12 +131,54 @@ object Futures {
   // recoverWith - second exception returned
   // fallbackTo - first exception returned
 
+  /*
+    Block for a future
+   */
+  case class User(name: String)
+  case class Transaction(sender: String, receiver: String, amount: Double, status: String)
+
+  object BankingApp {
+    // "APIs"
+    def fetchuser(name: String): Future[User] = Future {
+      // simulate DB fetching
+      Thread.sleep(500)
+      User(name)
+    }
+
+    def createTransaction(user: User, merchantName: String, amount: Double): Future[Transaction] = Future {
+      // simulate payment
+      Thread.sleep(1000)
+      Transaction(user.name, merchantName, amount, "SUCCESS")
+    }
+
+    // "external API" - synchronous
+    def purchase(username: String, item: String, merchantName: String, price: Double): String = {
+      /*
+        1. fetch user
+        2. create transaction
+        3. WAIT for the transaction to finish
+       */
+      val transactionStatusFuture: Future[String] = for {
+        user <- fetchuser(username)
+        transaction <- createTransaction(user, merchantName, price)
+      } yield transaction.status
+
+      // blocking call
+      Await.result(transactionStatusFuture, 2.seconds) // throws TimeoutException if the future doesn't finish in 2s
+    }
+  }
+
   def main(args: Array[String]): Unit = {
 //    println(aFuture.value) // inspect the value of the future RIGHT NOW
 //    Thread.sleep(2000)
 //    executor.shutdown()
 
     sendMessageToBestFriend_v3("rtjvm.id.2-jane", "Hey best friend, nice to talk to you again!")
+
+    println("purchasing...")
+    println(BankingApp.purchase("daniel-234", "shoes", "merchant-987", 3.56))
+    println("purchase complete")
+
     Thread.sleep(2000)
     executor.shutdown()
   }
