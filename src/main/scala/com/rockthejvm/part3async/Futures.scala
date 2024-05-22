@@ -3,7 +3,7 @@ package com.rockthejvm.part3async
 import java.util.concurrent.{ExecutorService, Executors}
 import scala.annotation.nowarn
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.util.{Failure, Random, Success, Try}
 
 object Futures {
@@ -168,16 +168,51 @@ object Futures {
     }
   }
 
+  /*
+    Promises - data structure that allows manual control of completion of a future
+      - completable/controllable wrapper of a future
+      - useful for passing around to different threads so that they can be completed manually on a different thread
+      - exposes the inner future
+    The usual pattern is
+      Thread 1 - creates an empty promise, knows how to handle the result
+      Thread 2 - has a reference to the promise, fulfills or fails the promise
+        - will trigger the completion on Thread 1
+      Allows communication between the futures in a purely functional way
+   */
+  def demoPromises(): Unit = {
+    val promise = Promise[Int]()
+    val futureInside: Future[Int] = promise.future
+
+    // thread 1 - "consumer": monitor the future for completion
+    futureInside.onComplete {
+      case Success(value) => println(s"[consumer]I've just been completed with $value")
+      case Failure(ex)    => ex.printStackTrace()
+    }
+
+    // thread 2 = "producer"
+    val producerThread = new Thread(() => {
+      println("[producer]Crunching numbers...")
+      Thread.sleep(1000)
+      // "fulfill" the promise
+      promise.success(42)
+      println("[producer]I'm done")
+    })
+
+    producerThread.start()
+  }
+
   def main(args: Array[String]): Unit = {
 //    println(aFuture.value) // inspect the value of the future RIGHT NOW
 //    Thread.sleep(2000)
 //    executor.shutdown()
 
-    sendMessageToBestFriend_v3("rtjvm.id.2-jane", "Hey best friend, nice to talk to you again!")
+//    sendMessageToBestFriend_v3("rtjvm.id.2-jane", "Hey best friend, nice to talk to you again!")
+//
+//    println("purchasing...")
+//    println(BankingApp.purchase("daniel-234", "shoes", "merchant-987", 3.56))
+//    println("purchase complete")
 
-    println("purchasing...")
-    println(BankingApp.purchase("daniel-234", "shoes", "merchant-987", 3.56))
-    println("purchase complete")
+    demoPromises()
 
     Thread.sleep(2000)
     executor.shutdown()
