@@ -201,6 +201,79 @@ object Futures {
     producerThread.start()
   }
 
+  /*
+    Exercises
+    1. Fulfill a future IMMEDIATELY with a value
+    2. Futures in sequence: make sure the first future has been completed before returning the second
+    3. create a method first(fa, fb) => return a new Future with the value of the first (fastest) Future to complete
+    4. last(fa, fb) => return a new Future with the value of the LAST (slowest) Future to complete
+    5. Retry an action returning a Future until a predicate holds true
+   */
+
+  // 1
+  def completeImmediately[A](value: A): Future[A] = Future(value) // not really immediate, it's async
+  def completeImmediately_v2[A](value: A): Future[A] = Future.successful(value) // synchronous completion
+  val completedFuture: Future[String] = completeImmediately("Value")
+
+  // 2
+  def inSequence[A, B](first: Future[A], second: Future[B]): Future[B] = first.flatMap(_ => second)
+
+  // 3
+  def first[A](f1: Future[A], f2: Future[A]): Future[A] = Future.firstCompletedOf(Seq(f1, f2))
+
+  // Promise EXTENDS future, so promise.future returns itself with a Future type instead of Promise
+  def first_v2[A](f1: Future[A], f2: Future[A]): Future[A] = {
+    val promise = Promise[A]()
+    f1.onComplete(promise.tryComplete) // tryComplete is better than complete to avoid throwing an exception
+    f2.onComplete(promise.tryComplete)
+
+    promise.future // this returns actual promise itself but as a type of Future
+  }
+
+  // 4
+  def last[A](f1: Future[A], f2: Future[A]): Future[A] = { // for some reason this doesn't really work
+    val firstCompleted = Future.firstCompletedOf(Seq(f1, f2))
+    if firstCompleted == f1 then f2 else f1
+  }
+
+  def last_v2[A](f1: Future[A], f2: Future[A]): Future[A] = {
+    val bothPromise = Promise[A]()
+    val lastPromise = Promise[A]()
+
+    def checkAndComplete(result: Try[A]): Unit =
+      if !bothPromise.tryComplete(result) then lastPromise.complete(result)
+
+    f1.onComplete(checkAndComplete)
+    f2.onComplete(checkAndComplete)
+
+    lastPromise.future
+  }
+
+  // 5
+  def retryUntil[A](action: () => Future[A], predicate: A => Boolean): Future[A] = {
+    val future = action()
+    future.filter(predicate).recoverWith { case _ =>
+      retryUntil(action, predicate)
+    }
+  }
+  // first I run the action that returns the future
+  // if the predicate passes on the value of the future, return the future
+  // repeat as many times as the predicate is false
+
+  def testRetries(): Unit = {
+    val random = new Random()
+    val action: () => Future[Int] = () =>
+      Future {
+        Thread.sleep(100)
+        val nextValue = random.nextInt(100)
+        println(s"Generated $nextValue")
+        nextValue
+      }
+
+    val predicate = (x: Int) => x < 10
+    retryUntil(action, predicate).foreach(finalResult => println(s"Settled at $finalResult"))
+  }
+
   def main(args: Array[String]): Unit = {
 //    println(aFuture.value) // inspect the value of the future RIGHT NOW
 //    Thread.sleep(2000)
@@ -212,10 +285,25 @@ object Futures {
 //    println(BankingApp.purchase("daniel-234", "shoes", "merchant-987", 3.56))
 //    println("purchase complete")
 
-    demoPromises()
+//    demoPromises()
+
+    lazy val fast = Future {
+      Thread.sleep(100)
+      1
+    }
+
+    lazy val slow = Future {
+      Thread.sleep(2000)
+      2
+    }
+
+    first(fast, slow).foreach(result => println(s"FIRST: $result"))
+    last(fast, slow).foreach(result => println(s"LAST: $result"))
+
+    testRetries()
 
     Thread.sleep(2000)
-    executor.shutdown()
+//    executor.shutdown()
   }
 
 }
