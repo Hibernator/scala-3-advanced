@@ -16,11 +16,12 @@ object Givens {
   given personOrdering: Ordering[Person] = new Ordering[Person]:
     override def compare(x: Person, y: Person): Int = x.name.compareTo(y.name)
 
+  // automatic injection of arguments by compiler
   val sortedPeople = people.sorted // (personOrdering) <- automatically passed by the compiler
 
   object PersonAltSyntax {
     // not interfering with the original ordering because it's in a different scope
-    // alternative syntax of implementing a trait or defining a given value
+    // alternative syntax of defining a given value that implements a trait
     given personOrdering: Ordering[Person] with {
       override def compare(x: Person, y: Person): Int = x.name.compareTo(y.name)
     }
@@ -83,8 +84,27 @@ object Givens {
   }
   val listProduct = combineAll(List(1, 2, 3, 4))(using myCombinator)
 
+  /*
+    Exercises:
+    1 - create a given for ordering Option[A] if you can order A
+    2 - create a summoning method that fetches the given value of your particular type
+   */
+
+  given optionOrdering[A: Ordering]: Ordering[Option[A]] with {
+    override def compare(x: Option[A], y: Option[A]): Int = (x, y) match {
+      case (None, None) => 0
+      case (_, None)    => 1
+      case (None, _)    => -1
+//      case (Some(xVal), Some(yVal)) => fetchGivenValue[Ordering[A]].compare(xVal, yVal)
+      case (Some(xVal), Some(yVal)) => summon[Ordering[A]].compare(xVal, yVal)
+    }
+  }
+
+  def fetchGivenValue[A](using givenValue: A): A = givenValue
+
   def main(args: Array[String]): Unit = {
     println(anOrderedList) // [1, 2, 3, 4] (before turning descendingOrdering to a given instance)
     println(anInverseOrderedList) // [4, 3, 2, 1]
+    println(List(Option(1), Option.empty[Int], Option(3), Option(-1000)).sorted)
   }
 }
