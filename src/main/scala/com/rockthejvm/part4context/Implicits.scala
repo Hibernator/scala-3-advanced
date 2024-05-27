@@ -1,5 +1,7 @@
 package com.rockthejvm.part4context
 
+import scala.language.implicitConversions
+
 object Implicits {
 
   // given/using clauses - ability to pass arguments automatically (implicitly) by the compiler
