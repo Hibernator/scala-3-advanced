@@ -1,7 +1,5 @@
 package com.rockthejvm.part5ts
 
-import scala.collection.mutable
-
 object VariancePositions {
 
   class Animal
@@ -112,6 +110,6 @@ object VariancePositions {
   def main(args: Array[String]): Unit = {
     val newList: Seq[Dog] = Seq(new Dog)
     val appendedCat: Seq[Animal] = newList.appended(new Cat)
-
+    println(appendedCat)
   }
 }
