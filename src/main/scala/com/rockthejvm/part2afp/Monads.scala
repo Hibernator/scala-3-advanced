@@ -72,7 +72,7 @@ object Monads {
     // prop 3: associativity
     /*
       anOption.flatMap(f).flatMap(g) = Option(42).flatMap(x => Option(x + 1)).flatMap(x => Option(2 * x))
-      = Option(43)flatMap(x => Option(2*  x))
+      = Option(43)flatMap(x => Option(2 * x))
       = Option(86)
 
       anOption.flatMap(x => f(x).flatMap(g)) = Option(42).flatMap(x => Option(x + 1).flatMap(y => 2 * y))

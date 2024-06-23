@@ -15,7 +15,7 @@ object CurryingPAFs {
 
   // invoking method or function with only 1 parameter is a partial application
 
-  // methods != function values but Scala allows conversion from method to function value
+  // methods != function values but Scala allows conversion from method to function value - eta-expansion
 
   // converting methods to functions = eta-expansion
   val add4: Int => Int = curriedAdder(4) // eta-expansion, turns a method into a function value
@@ -80,7 +80,7 @@ object CurryingPAFs {
   byName(parenMethod()) // 43. simple
 //  byName(parenMethod) // not ok, will not compile
   byName((() => 42)()) // ok, I passed a lambda and invoked it right away
-//  byName(() => 42) // not ok, because I passed an instance of Function1 byt not invoked it
+//  byName(() => 42) // not ok, because I passed an instance of Function1 but not invoked it
 
 //  byLambda(23) // not ok, not a lambda
 //  byLambda(method) // not ok, will not be eta-expanded into a 0-argument lambda because it has no arguments at all

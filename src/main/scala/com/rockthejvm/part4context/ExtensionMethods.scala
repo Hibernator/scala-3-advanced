@@ -21,7 +21,7 @@ object ExtensionMethods {
   // reason for extension methods: make APIs very expressive
   // reason 2: enhance CERTAIN types with new capabilities
   // => super powerful code
-  trait Combinator[A] { // in match terms, it's a Semigroup
+  trait Combinator[A] { // in math terms, it's a Semigroup
     def combine(x: A, y: A): A
   }
 

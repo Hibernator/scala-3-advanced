@@ -77,6 +77,7 @@ object PartialFunctions {
   }
 
   def main(args: Array[String]): Unit = {
+    println(canCallOn37)
     println(aPartialFunction(2))
 //    println(aPartialFunction(33)) // throws MatchError
     println(liftedPF(5)) // Some(999)
