@@ -16,8 +16,8 @@ object Monads {
 
     val listMultiply_2 = List(1, 2, 3).flatMap(x => List(4, 5, 6).map(y => x * y))
 
-    val f = (x: Int) => List(x, x + 1) // applicable for flatMap
-    val g = (x: Int) => List(x, x * 2) // applicable for flatMap
+    val f = (x: Int) => List(x, x + 1) // can be used as an argument of flatMap
+    val g = (x: Int) => List(x, x * 2) // can be used as an argument of flatMap
     val pure = (x: Int) => List(x) // same as list "constructor"
 
     // properties of a list and flatMap
@@ -44,7 +44,7 @@ object Monads {
 
     // associativity and flatMap guarantees that for every element of the list, f will be applied first and then g to the result of every f application
     // associativity guarantees order of application of f and g. It's guaranteed by flatMap mechanics
-    val associativity = aList.flatMap(f).flatMap(g) == aList.flatMap(x => f(x).map(g))
+    val associativity = aList.flatMap(f).flatMap(g) == aList.flatMap(x => f(x).flatMap(g))
 
   }
 

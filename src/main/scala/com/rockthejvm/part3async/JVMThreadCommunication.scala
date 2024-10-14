@@ -100,7 +100,7 @@ object ProdConsV2 {
 
 // insert a larger container (queue)
 // producer -> [ _ _ _ ] -> consumer
-// producer will insert values into the queue as long as there is space available, producer will retrieve values
+// producer will insert values into the queue as long as there is space available, consumer will retrieve values
 // producer will wait if the queue is full
 // consumer will pause if the queue is empty
 object ProdConsV3 {

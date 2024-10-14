@@ -1,7 +1,7 @@
 package com.rockthejvm.part3async
 
-import scala.collection.parallel.*
-import scala.collection.parallel.CollectionConverters.*
+import scala.collection.parallel.CollectionConverters._
+import scala.collection.parallel._
 import scala.collection.parallel.immutable.ParVector
 
 object ParallelCollections {

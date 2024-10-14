@@ -3,7 +3,7 @@ package com.rockthejvm.part4context
 object TypeClasses {
 
   /*
-    Small library to serialize date to a standard format (HTML)
+    Small library to serialize data to a standard format (HTML)
    */
 
   // Version 1: the object-oriented way

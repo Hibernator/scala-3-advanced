@@ -139,7 +139,7 @@ object LzList {
     fromStartingNumber(2, generate(2)(_ + 1))
   }
 
-  def primeNubmersEratosthenesDaniel: LzList[Int] = {
+  def primeNumbersEratosthenesDaniel: LzList[Int] = {
     def isPrime(n: Int): Boolean = {
       @tailrec
       def isPrimeTailrec(potentialDivisor: Int): Boolean = {
@@ -213,6 +213,6 @@ object LzListPlayground {
     println(fibos.takeAsList(100))
     println(LzList.primeNumbersSimple.takeAsList(100))
     println(LzList.primeNumbersEratosthenes.takeAsList(100))
-    println(LzList.primeNubmersEratosthenesDaniel.takeAsList(100))
+    println(LzList.primeNumbersEratosthenesDaniel.takeAsList(100))
   }
 }

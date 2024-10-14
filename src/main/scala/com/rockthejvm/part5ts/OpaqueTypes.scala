@@ -14,7 +14,7 @@ object OpaqueTypes {
 
     // inside the object, Name and String can be used interchangeably
     def addFriend(person1: Name, person2: Name): Boolean =
-      person1.length == person2.length // entire String API an be used
+      person1.length == person2.length // entire String API can be used
   }
 
   // outside SocialNetwork, Name and String are NOT related

@@ -1,4 +1,4 @@
-val scala3Version = "3.4.1"
+val scala3Version = "3.5.1"
 
 lazy val root = project
   .in(file("."))
@@ -19,7 +19,7 @@ lazy val root = project
       "-Werror"
     ),
     libraryDependencies ++= Seq(
-      "com.novocode" % "junit-interface" % "0.11" % "test",
+      "com.github.sbt.junit" % "jupiter-interface" % JupiterKeys.jupiterVersion.value % Test,
       "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
     )
   )

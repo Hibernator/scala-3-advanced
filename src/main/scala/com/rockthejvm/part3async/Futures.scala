@@ -1,10 +1,17 @@
 package com.rockthejvm.part3async
 
-import java.util.concurrent.{ExecutorService, Executors}
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import scala.annotation.nowarn
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, ExecutionContext, Future, Promise}
-import scala.util.{Failure, Random, Success, Try}
+import scala.util.Failure
+import scala.util.Random
+import scala.util.Success
+import scala.util.Try
 
 object Futures {
 
@@ -92,7 +99,7 @@ object Futures {
   // onComplete is a hassle
   // solution: functional composition
 
-  val janeProfileFuture = SocialNetwork.fetchProfile("rtjvm.id.2-jane")
+  val janeProfileFuture: Future[Profile] = SocialNetwork.fetchProfile("rtjvm.id.2-jane")
   val janeFuture: Future[String] =
     janeProfileFuture.map(profile => profile.name) // map transforms the value contained inside, asynchronously
   val janesBestFriend: Future[Profile] = janeProfileFuture.flatMap(profile => SocialNetwork.fetchBestFriend(profile))

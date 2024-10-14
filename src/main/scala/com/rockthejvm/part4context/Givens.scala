@@ -4,7 +4,7 @@ object Givens {
 
   // list sorting
   val aList = List(4, 2, 3, 1)
-  val anOrderedList = aList.sorted // (descendingOrdering)
+  val anOrderedList = aList.sorted // (ascendingOrdering)
 
   given descendingOrdering: Ordering[Int] = Ordering.fromLessThan(_ > _)
   val anInverseOrderedList = aList.sorted(descendingOrdering)

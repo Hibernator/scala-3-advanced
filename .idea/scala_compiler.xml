@@ -13,7 +13,7 @@
         <parameter value="-Werror" />
         <parameter value="-Xsemanticdb" />
         <parameter value="-semanticdb-target" />
-        <parameter value="$PROJECT_DIR$/target/scala-3.4.1/meta" />
+        <parameter value="$PROJECT_DIR$/target/scala-3.5.1/meta" />
       </parameters>
     </profile>
   </component>
